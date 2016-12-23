@@ -1,0 +1,57 @@
+<html ng-app = "surveyApp">
+  <head>
+    <meta charset="utf-8">
+    <title>Surveys</title>
+    <script type="text/javascript" src="/angular/angular.js"></script>
+    <script type="text/javascript" src="/angular-route/angular-route.js"></script>
+    <script type="text/javascript">
+      var app = angular.module("surveyApp", ["ngRoute"]);
+
+      app.config(function ($routeProvider){
+        $routeProvider
+        .when("/login", {templateUrl: "/partials/login.html"})
+        // .when("/dashboard", {templateUrl: "/partials/dashboard.html"})
+
+      });
+
+
+      app.factory("surveyFactory", function($http){
+        var factory = { user : null};
+
+        factory.login = function(user, successfullyLoggedIn){
+          $http.get("/users/" + user.username).then(function(response){
+            factory.user = response.data.user;
+
+            if(factory.user == null){
+              $http.post("/users", user).then(function(response){
+                factory.user = response.data.user;
+                successfullyLoggedIn();
+              });
+            } else {
+              successfullyLoggedIn();
+            }
+          });
+        };
+        return factory;
+      });
+
+      app.controller("loginController", function($scope, surveyFactory, $location){
+
+        $scope.login = function(user){
+          surveyFactory.login(user, function(){
+            $location.url("/dashboard");
+          });
+        };
+      });
+
+
+    </script>
+  </head>
+  <body>
+
+    <div ng-view=""></div>
+
+
+
+  </body>
+</html>
